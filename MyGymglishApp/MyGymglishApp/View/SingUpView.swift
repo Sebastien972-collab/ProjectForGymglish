@@ -11,6 +11,7 @@ struct SingUpView: View {
     @State var password = ""
     @State var alertEmptyField = false
     @State var alertWrongField = false
+    @State var errorMessage = ""
     var body: some View {
         ZStack {
             Color.pink.edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
@@ -20,18 +21,15 @@ struct SingUpView: View {
                 UsernameTextField(username: $username)
                 PasswordTextField(password: $password)
                 Spacer()
-                ButtonSingIn(username: username, password: password, alertEmptyField: $alertEmptyField, alertWrongField: $alertWrongField)
+                ButtonSingIn(username: username, password: password, alertEmptyField: $alertEmptyField, alertWrongField: $alertWrongField, errorMessage: $errorMessage)
                     .padding()
             }
-            .alert(isPresented: $alertEmptyField, content: {
-                Alert(title: Text("Error"), message: Text("You must enter the username and password fields"), dismissButton: .default(Text("ok")))
-            })
             .onTapGesture {
                 hideKeyboard()
             }
             .alert(isPresented: $alertWrongField, content: {
-                Alert(title: Text("Error"), message: Text("Your username or password is wrong"), dismissButton: .default(Text("ok")))
-        })
+                Alert(title: Text("Error"), message: Text(errorMessage), dismissButton: .default(Text("ok")))
+            })
         }
     }
 }
@@ -67,15 +65,13 @@ struct ButtonSingIn: View {
     var password : String
     @Binding var alertEmptyField : Bool
     @Binding var alertWrongField : Bool
+    @Binding var errorMessage : String
     @State var isPresented = false
     var body: some View {
         Button(action: {
-            guard !username.isEmpty && !password.isEmpty else {
-                alertEmptyField = true
-                return
-            }
             guard User.currentUser.username == username && User.currentUser.password == password else {
                 alertWrongField = true
+                errorMessage = "Your username or password is wrong"
                 return
             }
             isPresented = true
